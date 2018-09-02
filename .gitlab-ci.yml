@@ -7,5 +7,14 @@ before_script:
 
 compile:
   stage: build
+  except:
+    - master
+  script:
+    - make test build image
+
+compile and push:
+  stage: build
+  only:
+    - master
   script:
     - make test build image push
