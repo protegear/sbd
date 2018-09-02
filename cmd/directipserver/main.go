@@ -49,7 +49,7 @@ func main() {
 	}
 
 	log.Info("start service", "revision", revision, "builddate", builddate, "listen", listen)
-	distribution = mux.New(*workers)
+	distribution = mux.New(*workers, log)
 	if *config != "" {
 		cfg, err := os.Open(*config)
 		if err != nil {

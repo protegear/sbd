@@ -46,6 +46,7 @@ type Distributer interface {
 }
 
 type distributer struct {
+	log15.Logger
 	targets       []Target
 	sbdChannel    chan *sbdMessage
 	configChannel chan Targets
@@ -57,12 +58,13 @@ type sbdMessage struct {
 }
 
 // New creates a new Distributor with the given number of workers
-func New(numworkers int) Distributer {
+func New(numworkers int, log log15.Logger) Distributer {
 	sc := make(chan *sbdMessage)
 	cc := make(chan Targets)
 	s := &distributer{
 		sbdChannel:    sc,
 		configChannel: cc,
+		Logger:        log,
 	}
 	for i := 0; i < numworkers; i++ {
 		go s.run(i)
@@ -108,20 +110,20 @@ func (f *distributer) distribute(data *sbd.InformationBucket) error {
 }
 
 func (f *distributer) Close() {
-	log15.Info("close distributor")
+	f.Info("close distributor")
 	close(f.configChannel)
 	close(f.sbdChannel)
 }
 
 func (f *distributer) run(worker int) {
-	log15.Info("start distributor service", "worker", worker)
+	f.Info("start distributor service", "worker", worker)
 	for {
 		select {
 		case cfg, more := <-f.configChannel:
 			if !more {
 				return
 			}
-			log15.Info("set config", "config", cfg, "worker", worker)
+			f.Info("set config", "config", cfg, "worker", worker)
 			f.targets = cfg
 		case msg := <-f.sbdChannel:
 			go f.handle(msg)
@@ -149,14 +151,14 @@ func (f *distributer) handle(m *sbdMessage) {
 			}
 			rsp, err := t.client.Do(rq)
 			if err != nil {
-				log15.Error("cannot call webhook", "target", t.Backend, "error", err)
+				f.Error("cannot call webhook", "target", t.Backend, "error", err)
 				continue
 			}
 			content, _ := ioutil.ReadAll(rsp.Body)
 			if rsp.StatusCode/100 == 2 {
-				log15.Info("data transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
+				f.Info("data transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
 			} else {
-				log15.Error("data not transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
+				f.Error("data not transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
 			}
 			rsp.Body.Close()
 		}
