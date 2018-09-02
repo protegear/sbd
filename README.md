@@ -48,6 +48,38 @@ The controller will match the imei of incoming messages with the annotated regex
 
 You can annotate as many services as you want; you can also annotate them with specific IMEI's. It's up to you.
 
+## Standalone service
+
+First of all you have to compile the service. You need at least Go 1.11 installed. Simply type `make` so build a binary in the `cmd/directipserver/bin` directory.
+
+You can use the service as a standalone daemon. In this case you have to write a configuration file for example:
+~~~yaml
+- imeipattern: 30.*
+  backend: http://localhost:8080/service1
+- imeipattern: .*
+  backend: https://localhost:8443/service2
+  skiptls: true
+  header:
+    mytoken: 1234
+~~~
+This configuration would post all IMEI's which start with `30` to be posted to the URL `http://localhost:8080/service1`. All other IMEI's will be posted to the URL `https://localhost:8443/service2` and the distribution service will not check the TLS certificate (use this only in development!). Additional Headers can also be added here.
+
+Now start the distribution service:
+~~~sh
+$ ./directipserver -config ~/tmp/test.yaml -logformat term 0.0.0.0:8123
+INFO[09-02|16:42:23] start service                            stage=test revision=29fb44a3 builddate="2018-09-02 16:30:51+02:00" listen=0.0.0.0:8123 caller=main.go:51
+INFO[09-02|16:42:23] start distributor service                worker=1 caller=distributor.go:117
+INFO[09-02|16:42:23] start distributor service                worker=3 caller=distributor.go:117
+INFO[09-02|16:42:23] start distributor service                worker=2 caller=distributor.go:117
+INFO[09-02|16:42:23] start distributor service                worker=0 caller=distributor.go:117
+INFO[09-02|16:42:23] change configuration                     stage=test targets="[{ID: IMEIPattern:30.* Backend:http://localhost:8080/service1 SkipTLS:false Header:map[] imeipattern:<nil> client:<nil>} {ID: IMEIPattern:.* Backend:https://localhost:8443/service2 SkipTLS:true Header:map[mytoken:1234] imeipattern:<nil> client:<nil>}]" caller=main.go:71
+INFO[09-02|16:42:23] no incluster config, assume standalone mode stage=test caller=main.go:77
+INFO[09-02|16:42:23] start distributor service                worker=4 caller=distributor.go:117
+INFO[09-02|16:42:23] set config                               config="[{ID: IMEIPattern:30.* Backend:http://localhost:8080/service1 SkipTLS:false Header:map[] imeipattern:0xc00008d2c0 client:0xc000087e30} {ID: IMEIPattern:.* Backend:https://localhost:8443/service2 SkipTLS:true Header:map[mytoken:1234] imeipattern:0xc00008d400 client:0xc000087ec0}]" worker=1 caller=distributor.go:124
+~~~
+
+You can omit the `-logformat` option to use json logging.
+
 # Important notice
 The *sbd* service always sends an OK-acknowledge back to iridium if the post to the HTTP service was successful. It is up to the receiver of the webservice to store and forward the message. If the service returns a successfull HTTP response code and crashes, the message will be lost because iridium will receive a successfull ack.
 
