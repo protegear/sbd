@@ -205,7 +205,7 @@ type Location struct {
 	Longitude float64
 }
 
-// GetLagLng converts the location information to latitude/longitude
+// GetLatLng converts the location information to latitude/longitude
 // values which can be used by other systems. The orientiation is
 // used to convert the values to positive or negative vals.
 func (loc *MOLocationInformation) GetLatLng() (float64, float64) {
