@@ -1,0 +1,11 @@
+image: ulrichschreiner/go-web-dev
+stages:
+  - build
+
+before_script:
+  - docker login -u $HUB_USER -p $HUB_PWD
+
+compile:
+  stage: build
+  script:
+    - make test build image push

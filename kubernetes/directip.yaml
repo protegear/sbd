@@ -1,0 +1,99 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: directip-controller
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: directip
+  namespace: directip-controller
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: directip-controller
+  name: directip
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "watch", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: directip
+subjects:
+- kind: ServiceAccount
+  name: directip
+  namespace: directip-controller
+roleRef:
+  kind: ClusterRole
+  name: directip
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: directip
+  namespace: directip-controller
+data:
+  config.yaml: |
+    []
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: directip-controller
+  name: directip
+  labels:
+    app: directip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: directip
+  template:
+    metadata:
+      labels:
+        app: directip
+    spec:
+      serviceAccountName: directip
+      volumes:
+        - name: config-volume
+          configMap:
+            name: directip
+      containers:
+        - name: directipserver
+          image: registry.protegear.io/globalsafetrack/directip:latest
+          imagePullPolicy: Always
+          command: ["/directipserver", "0.0.0.0:2022"]
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 2023
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - containerPort: 2022
+          volumeMounts:
+            - mountPath: /etc/directip/
+              name: config-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: directip
+  namespace: directip-controller
+  labels:
+    run: directip
+spec:
+  type: NodePort
+  ports:
+  - port: 2022
+    nodePort: 32022
+    protocol: TCP
+    name: sbdport
+  selector:
+    app: directip
