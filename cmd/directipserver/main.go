@@ -17,6 +17,9 @@ import (
 
 const (
 	defaultListen = "127.0.0.1:2022"
+	logJSON       = "json"
+	logFMT        = "fmt"
+	logTERM       = "term"
 )
 
 var (
@@ -31,13 +34,14 @@ func main() {
 	health := flag.String("health", "127.0.0.1:2023", "the healtcheck URL (http)")
 	stage := flag.String("stage", "test", "the name of the stage where this service is running")
 	loglevel := flag.String("loglevel", "info", "the loglevel, debug|info|warn|error|crit")
+	logformat := flag.String("logformat", "json", "the logformat, fmt|json|term")
 	workers := flag.Int("workers", 5, "the number of workers")
 
-	setLogOutputLevel(*loglevel)
+	flag.Parse()
+
+	setLogOutput(*logformat, *loglevel)
 
 	log = log15.New("stage", *stage)
-
-	flag.Parse()
 
 	listen := defaultListen
 	if len(flag.Args()) > 0 {
@@ -177,14 +181,19 @@ func targetFromService(s *corev1.Service) *mux.Target {
 	return nil
 }
 
-var defaultHandler = log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.JsonFormat()))
-
-func setLogOutputLevel(loglevel string) {
+func setLogOutput(format, loglevel string) {
+	h := log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.JsonFormat()))
+	switch format {
+	case logFMT:
+		h = log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.LogfmtFormat()))
+	case logTERM:
+		h = log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.TerminalFormat()))
+	}
 	lvl, e := log15.LvlFromString(loglevel)
 	if e != nil {
 		lvl = log15.LvlInfo
 		log15.Error("cannot parse level from parameter", "level", loglevel, "error", e)
 	}
-	target := log15.LvlFilterHandler(lvl, defaultHandler)
+	target := log15.LvlFilterHandler(lvl, h)
 	log15.Root().SetHandler(target)
 }
