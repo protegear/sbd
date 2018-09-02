@@ -1,4 +1,11 @@
+
+[![pipeline status](https://gitlab.com/globalsafetrack/sbd/badges/master/pipeline.svg)](https://gitlab.com/globalsafetrack/sbd/commits/master)
+
 # Short Burst Data (Iridium)
+
+*Short Burst Data* (SBD) is used by Iridium to send data from their datacenter to your service. This repository contains a library and a service to receive such data. You can use the library in your code, you can start the `directipserver` by starting the service standalone (or via *docker*) or you can deploy the *directipserver* as a *kubernetes controller* in your cluster.
+
+## Library
 
 This repository implements a Go parser for Iridiums *Short Bust Data*. To use
 it you can import it and call the `GetElements` function with a reader:
