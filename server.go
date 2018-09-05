@@ -14,18 +14,26 @@ const (
 	deadline = 30 * time.Second
 )
 
-type SBDHandler interface {
+// A Handler is called by the service when a new *Short Burst Data* packet
+// comes in. The handler will get an *InformationBucket* where all the packet data
+// is bundled. If this handler returns nil, the server will send a positiv
+// acknowledge back otherwise the packet will not be acknowledged.
+type Handler interface {
 	Handle(data *InformationBucket) error
 }
 
-type SBDHandlerFunc func(data *InformationBucket) error
+// A HandlerFunc makes a handler from a function.
+type HandlerFunc func(data *InformationBucket) error
 
-func (f SBDHandlerFunc) Handle(data *InformationBucket) error {
+// Handle implements the required interface for *Handler*.
+func (f HandlerFunc) Handle(data *InformationBucket) error {
 	return f(data)
 }
 
-func Logger(log log15.Logger, next SBDHandler) SBDHandler {
-	return SBDHandlerFunc(func(data *InformationBucket) error {
+// Logger is a middleware function which wraps a handler with logging
+// capabilities.
+func Logger(log log15.Logger, next Handler) Handler {
+	return HandlerFunc(func(data *InformationBucket) error {
 		js, err := json.Marshal(data)
 		if err != nil {
 			return err
@@ -43,7 +51,12 @@ type result struct {
 func createResult(status byte) *result {
 	return &result{Header: Header{ID: moConfirmationID, ElementLength: 1}, MOConfirmationMessage: MOConfirmationMessage{Status: status}}
 }
-func NewService(log log15.Logger, address string, h SBDHandler) error {
+
+// NewService starts a listener on the given *address* and dispatches every
+// short burst data packet to the given handler. If the handler returns a
+// non-nil error, the service will send a negative response, otherwise the
+// responsestatus will be ok.
+func NewService(log log15.Logger, address string, h Handler) error {
 	l, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("cannot open listening address %q: %v", address, err)
