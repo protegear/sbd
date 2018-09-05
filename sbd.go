@@ -34,6 +34,8 @@ const (
 	NW = Orientation(1)
 	SE = Orientation(2)
 	SW = Orientation(3)
+
+	protocolRevision = 1
 )
 
 func (o Orientation) LatLng(lat, lng float64) (float64, float64) {
@@ -254,7 +256,7 @@ func GetElements(in io.Reader) (*InformationBucket, error) {
 	if err != nil {
 		return nil, err
 	}
-	if mh.ProtocolRevision != 1 {
+	if mh.ProtocolRevision != protocolRevision {
 		return nil, fmt.Errorf("wrong protocol version: %d", mh.ProtocolRevision)
 	}
 	bbuf := make([]byte, mh.MessageLength)

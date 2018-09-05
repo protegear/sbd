@@ -44,12 +44,13 @@ func Logger(log log15.Logger, next Handler) Handler {
 }
 
 type result struct {
+	MessageHeader
 	Header
 	MOConfirmationMessage
 }
 
 func createResult(status byte) *result {
-	return &result{Header: Header{ID: moConfirmationID, ElementLength: 1}, MOConfirmationMessage: MOConfirmationMessage{Status: status}}
+	return &result{MessageHeader: MessageHeader{ProtocolRevision: protocolRevision, MessageLength: 4}, Header: Header{ID: moConfirmationID, ElementLength: 1}, MOConfirmationMessage: MOConfirmationMessage{Status: status}}
 }
 
 // NewService starts a listener on the given *address* and dispatches every
