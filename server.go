@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/inconshreveable/log15"
+)
+
+const (
+	deadline = 30 * time.Second
 )
 
 type SBDHandler interface {
@@ -57,6 +62,10 @@ func NewService(log log15.Logger, address string, h SBDHandler) error {
 			// directip connects, sends message and closes connection, so no whilte loop is needed
 			// to read more than one message from the connection
 			defer c.Close()
+
+			// set a deadline so we do not run out of connections
+			c.SetDeadline(time.Now().Add(deadline))
+
 			log.Info("new connection")
 			el, err := GetElements(c)
 			res := createResult(0)
