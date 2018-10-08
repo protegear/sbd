@@ -10,8 +10,8 @@ import (
 	"github.com/ericchiang/k8s"
 	corev1 "github.com/ericchiang/k8s/apis/core/v1"
 	"github.com/inconshreveable/log15"
-	"gitlab.com/globalsafetrack/sbd"
-	"gitlab.com/globalsafetrack/sbd/mux"
+	"gitlab.com/protegear/sbd"
+	"gitlab.com/protegear/sbd/mux"
 	yaml "gopkg.in/yaml.v2"
 )
 

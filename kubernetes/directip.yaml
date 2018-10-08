@@ -66,7 +66,7 @@ spec:
             name: directip
       containers:
         - name: directipserver
-          image: registry.protegear.io/globalsafetrack/directip:latest
+          image: globalsafetrack/directip:latest
           imagePullPolicy: Always
           command: ["/directipserver", "0.0.0.0:2022"]
           livenessProbe:

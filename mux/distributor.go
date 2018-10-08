@@ -19,7 +19,7 @@ import (
 	"regexp"
 
 	"github.com/inconshreveable/log15"
-	"gitlab.com/globalsafetrack/sbd"
+	"gitlab.com/protegear/sbd"
 )
 
 // A Target stores the configuration of a backend service where the SBD data should be poushed.
