@@ -19,6 +19,10 @@ const (
 	moPayloadID             = ElementID(0x02)
 	moLocationInformationID = ElementID(0x03)
 	moConfirmationID        = ElementID(0x05)
+	mtHeaderID              = ElementID(0x41)
+	mtPayloadID             = ElementID(0x42)
+	mtConfirmationMsg       = ElementID(0x44)
+	mtMessagePriority       = ElementID(0x46)
 
 	// SBD Session Status
 	StCompleted             = SessionStatus(0)
