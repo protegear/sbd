@@ -13,7 +13,7 @@ func handle(mg *MessageHeader, dih *DirectIPHeader, payload []byte, priority *in
 	return Confirmation{}
 }
 
-func OnError(e error) {
+func onError(e error) {
 	log.Printf("Error: %v", e)
 }
 
@@ -97,7 +97,7 @@ func (ts *testServer) close() {
 
 func (ts *testServer) reset() {
 	ts.Handle = handle
-	ts.OnError = OnError
+	ts.OnError = onError
 }
 
 func newTestServer() (*testServer, error) {
