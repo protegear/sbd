@@ -151,22 +151,22 @@ func FlushMTQueue(rq *DirectIPRequest) {
 }
 
 // SendRingAlertNoMTM sets the corresponding disposition flag.
-func SendRingAlertNoMTM(rq DirectIPRequest) {
+func SendRingAlertNoMTM(rq *DirectIPRequest) {
 	rq.dispositionflags |= sendRingAlertNoMTM
 }
 
 // UpdateSSDLocation sets the corresponding disposition flag.
-func UpdateSSDLocation(rq DirectIPRequest) {
+func UpdateSSDLocation(rq *DirectIPRequest) {
 	rq.dispositionflags |= updateSSDLocation
 }
 
 // HighPriorityMessage sets the corresponding disposition flag.
-func HighPriorityMessage(rq DirectIPRequest) {
+func HighPriorityMessage(rq *DirectIPRequest) {
 	rq.dispositionflags |= highPriorityMessage
 }
 
 // AssignMTMSN sets the corresponding disposition flag.
-func AssignMTMSN(rq DirectIPRequest) {
+func AssignMTMSN(rq *DirectIPRequest) {
 	rq.dispositionflags |= assignMTMSN
 }
 
