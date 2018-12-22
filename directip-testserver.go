@@ -13,18 +13,6 @@ func handle(mg *MessageHeader, dih *DirectIPHeader, payload []byte, priority *in
 	return Confirmation{}
 }
 
-func onMessageHeader(mh *MessageHeader) {
-	log.Printf("MessageHeader: %v", *mh)
-}
-
-func onDirectIPHeader(mtdiph *mtDirectIPHeader) {
-	log.Printf("mtDirectipHeader: %v", *mtdiph)
-}
-
-func onPayload(h *Header, data []byte) {
-	log.Printf("Header: %v, Data: %v", h, data)
-}
-
 func OnError(e error) {
 	log.Printf("Error: %v", e)
 }
