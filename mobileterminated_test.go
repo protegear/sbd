@@ -8,8 +8,9 @@ import (
 )
 
 func TestEmptyPayload(t *testing.T) {
-	ts, _ := newTestServer()
-	defer ts.close()
+	ts, _ := NewDIPServer("127.0.0.1:0")
+	go ts.Start()
+	defer ts.Close()
 	Convey("with only an imei given", t, func() {
 		rq := NewRequest().With(
 			IMEI("123"),
@@ -28,8 +29,9 @@ func TestEmptyPayload(t *testing.T) {
 }
 
 func TestWithPayload(t *testing.T) {
-	ts, _ := newTestServer()
-	defer ts.close()
+	ts, _ := NewDIPServer("127.0.0.1:0")
+	go ts.Start()
+	defer ts.Close()
 	Convey("with imei and payload given", t, func() {
 		rq := NewRequest().With(
 			IMEI("123"),

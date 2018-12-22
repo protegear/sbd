@@ -6,7 +6,7 @@ import (
 	"net"
 )
 
-type DITestServerHandler func(mg *MessageHeader, dih *DirectIPHeader, payload []byte, priority *int) Confirmation
+type DIPHandler func(mg *MessageHeader, dih *DirectIPHeader, payload []byte, priority *int) Confirmation
 
 func handle(mg *MessageHeader, dih *DirectIPHeader, payload []byte, priority *int) Confirmation {
 	log.Printf("MH: %v, DIH: %v, Data: %v, Prio: %v", mg, dih, payload, priority)
@@ -17,16 +17,19 @@ func onError(e error) {
 	log.Printf("Error: %v", e)
 }
 
-type testServer struct {
+// A DIPServer is a server which can listen on an given tcp address
+// and parses the incoming directip messages. Set the Handler-Field
+// to implement your wanted behaviour. The default is simply logging.
+type DIPServer struct {
 	address      string
 	listener     net.Listener
 	confirmation confirmationMessage
 
-	Handle  DITestServerHandler
+	Handle  DIPHandler
 	OnError func(error)
 }
 
-func (ts *testServer) start() {
+func (ts *DIPServer) start() {
 	go func() {
 		for {
 			con, err := ts.listener.Accept()
@@ -91,25 +94,31 @@ func (ts *testServer) start() {
 	}()
 }
 
-func (ts *testServer) close() {
+// Close closes the server so it does not accept any more connections.
+func (ts *DIPServer) Close() {
 	ts.listener.Close()
 }
 
-func (ts *testServer) reset() {
+// Start starts listening. This function will block!
+func (ts *DIPServer) Start() {
+	ts.start()
+}
+
+func (ts *DIPServer) reset() {
 	ts.Handle = handle
 	ts.OnError = onError
 }
 
-func newTestServer() (*testServer, error) {
-	ls, err := net.Listen("tcp", "127.0.0.1:0")
+// NewDIPServer returns a new directip server listening on the given address.
+func NewDIPServer(address string) (*DIPServer, error) {
+	ls, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, err
 	}
-	ts := testServer{
+	ts := DIPServer{
 		address:  ls.Addr().String(),
 		listener: ls,
 	}
 	ts.reset()
-	go ts.start()
 	return &ts, nil
 }
