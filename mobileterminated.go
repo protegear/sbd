@@ -27,7 +27,7 @@ type DirectIPRequest struct {
 }
 
 type DirectIPHeader struct {
-	UniqueClientMsgID [4]byte  `json:"uniqueclientmsgid`
+	UniqueClientMsgID [4]byte  `json:"uniqueclientmsgid"`
 	IMEI              [15]byte `json:"imei"`
 	DispositionFlags  uint16   `json:"dispositionflags"`
 }
