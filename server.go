@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/inconshreveable/log15"
+	proxyproto "github.com/pires/go-proxyproto"
 )
 
 const (
@@ -57,10 +58,13 @@ func createResult(status byte) *result {
 // short burst data packet to the given handler. If the handler returns a
 // non-nil error, the service will send a negative response, otherwise the
 // responsestatus will be ok.
-func NewService(log log15.Logger, address string, h Handler) error {
+func NewService(log log15.Logger, address string, h Handler, proxyprotocol bool) error {
 	l, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("cannot open listening address %q: %v", address, err)
+	}
+	if proxyprotocol {
+		l = &proxyproto.Listener{Listener: l, ProxyHeaderTimeout: 10 * time.Second}
 	}
 	defer l.Close()
 	for {

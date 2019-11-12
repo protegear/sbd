@@ -36,6 +36,7 @@ func main() {
 	loglevel := flag.String("loglevel", "info", "the loglevel, debug|info|warn|error|crit")
 	logformat := flag.String("logformat", "json", "the logformat, fmt|json|term")
 	workers := flag.Int("workers", 5, "the number of workers")
+	useproxyprotocol := flag.Bool("proxyprotocol", false, "use the proxyprotocol on the listening socket")
 
 	flag.Parse()
 
@@ -81,7 +82,7 @@ func main() {
 	}
 
 	go runHealth(*health)
-	sbd.NewService(log, listen, sbd.Logger(log, distribution))
+	sbd.NewService(log, listen, sbd.Logger(log, distribution), *useproxyprotocol)
 }
 
 func runHealth(health string) {
