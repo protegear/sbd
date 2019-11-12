@@ -78,7 +78,7 @@ func main() {
 		log.Info("no incluster config, assume standalone mode")
 	} else {
 		log.Info("incluster config found, assume kubernetes mode")
-		go watchServices(log, ctx, client, distribution)
+		go watchServices(ctx, log, client, distribution)
 	}
 
 	go runHealth(*health)
@@ -91,7 +91,7 @@ func runHealth(health string) {
 	}))
 }
 
-func watchServices(log log15.Logger, ctx context.Context, client *k8s.Client, s mux.Distributer) {
+func watchServices(ctx context.Context, log log15.Logger, client *k8s.Client, s mux.Distributer) {
 	watcher, err := client.Watch(ctx, "", &corev1.Service{})
 	if err != nil {
 		log.Error("cannot create watcher for services", "error", err)
