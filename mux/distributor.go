@@ -22,7 +22,7 @@ import (
 	"gitlab.com/protegear/sbd"
 )
 
-// A Target stores the configuration of a backend service where the SBD data should be poushed.
+// A Target stores the configuration of a backend service where the SBD data should be pushed.
 type Target struct {
 	ID          string            `yaml:"id,omitempty"`
 	IMEIPattern string            `yaml:"imeipattern"`
