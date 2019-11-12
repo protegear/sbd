@@ -1,0 +1,20 @@
+{
+	"name": "SBD",
+	"dockerComposeFile": [
+		"${env:HOME}/Nextcloud/vscode/dev-compose.yml"
+	],
+	"workspaceFolder": "${localWorkspaceFolder}",
+	"service": "go-dev-tools",
+	"extensions": [
+		"ms-vscode.Go",
+		"humao.rest-client",
+		"dline.cobaltnext",
+		"sirtori.indenticator",
+		"wayou.vscode-todo-highlight",
+		"gruntfuggly.todo-tree",
+		"eamodio.gitlens",
+		"MS-vsliveshare.vsliveshare",
+		"MS-vsliveshare.vsliveshare-pack"
+	],
+	"overrideCommand": false
+}
