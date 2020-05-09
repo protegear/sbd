@@ -1,5 +1,4 @@
-
-[![pipeline status](https://gitlab.com/protegear/sbd/badges/master/pipeline.svg)](https://gitlab.com/protegear/sbd/commits/master) [![coverage report](https://gitlab.com/protegear/sbd/badges/master/coverage.svg)](https://gitlab.com/protegear/sbd/commits/master)
+[![Build Status](https://github.drone.protegear.io/api/badges/protegear/sbd/status.svg)](https://github.drone.protegear.io/protegear/sbd)
 
 # Short Burst Data (Iridium)
 
