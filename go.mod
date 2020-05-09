@@ -1,4 +1,4 @@
-module gitlab.com/protegear/sbd
+module github.com/protegear/sbd
 
 require (
 	github.com/ericchiang/k8s v1.2.0

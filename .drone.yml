@@ -1,0 +1,22 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: directip
+  image: ulrichschreiner/go-web-dev:latest
+  commands:
+  - make test build
+
+- name: publish
+  image: plugins/docker
+  settings:
+    dockerfile: Dockerfile
+    autotag: true
+    repo: protegear/directip
+    username:
+      from_secret: hub_username
+    password:
+      from_secret: hub_password
+
