@@ -8,7 +8,7 @@ steps:
   image: ulrichschreiner/go-web-dev:latest
   commands:
   - make test build
-  - echo "g$(git rev-parse --short=8 HEAD)" >.tags
+  - echo "latest,g$(git rev-parse --short=8 HEAD)" >.tags
 
 - name: publish
   image: plugins/docker
