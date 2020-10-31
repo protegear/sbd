@@ -14,7 +14,7 @@ steps:
   image: plugins/docker
   settings:
     dockerfile: Dockerfile
-    repo: protegear/directip
+    repo: quay.io/protegear/directip
     username:
       from_secret: quay_username
     password:
