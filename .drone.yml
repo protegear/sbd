@@ -15,6 +15,7 @@ steps:
   settings:
     dockerfile: Dockerfile
     repo: quay.io/protegear/directip
+    registry: quay.io
     username:
       from_secret: quay_username
     password:
