@@ -5,7 +5,7 @@ name: default
 
 steps:
 - name: directip
-  image: ulrichschreiner/go-web-dev:latest
+  image: registry.gitlab.com/ulrichschreiner/go-web-dev:latest
   commands:
   - make test build
   - echo "latest,g$(git rev-parse --short=8 HEAD)" >.tags
@@ -16,7 +16,7 @@ steps:
     dockerfile: Dockerfile
     repo: protegear/directip
     username:
-      from_secret: hub_username
+      from_secret: quay_username
     password:
-      from_secret: hub_password
+      from_secret: quay_password
 

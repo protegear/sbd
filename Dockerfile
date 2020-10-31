@@ -1,9 +1,9 @@
-FROM alpine:3
+FROM registry.gitlab.com/ulrichschreiner/base/debian:buster-slim
 
-RUN apk --no-cache add ca-certificates libcap && mkdir /conf
+RUN apt update && apt -y install ca-certificates libcap2 && mkdir /conf
 
-RUN addgroup -S -g 1001 directip \
-    && adduser -u 1001 -D -S -s /sbin/nologin -G directip directip
+RUN addgroup --system --gid 1001 directip \
+    && adduser --uid 1001 --disabled-password --system --shell /sbin/nologin --ingroup directip directip
 
 COPY cmd/directipserver/bin/directipserver /directipserver
 
