@@ -66,7 +66,7 @@ spec:
             name: directip
       containers:
         - name: directipserver
-          image: globalsafetrack/directip:latest
+          image: quay.io/protegear/directip:latest
           imagePullPolicy: Always
           command: ["/directipserver", "0.0.0.0:2022"]
           livenessProbe:
