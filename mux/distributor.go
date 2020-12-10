@@ -142,6 +142,7 @@ func (f *distributer) handle(m *sbdMessage) {
 		if t.imeipattern.MatchString(imei) {
 			rq, err := http.NewRequest(http.MethodPost, t.Backend, bytes.NewBuffer(js))
 			if err != nil {
+				f.Error("cannot create request", "error", err, "target", t.Backend)
 				m.returnedError <- err
 				return
 			}
@@ -152,15 +153,18 @@ func (f *distributer) handle(m *sbdMessage) {
 			rsp, err := t.client.Do(rq)
 			if err != nil {
 				f.Error("cannot call webhook", "target", t.Backend, "error", err)
-				continue
+				m.returnedError <- err
+				return
 			}
+			defer rsp.Body.Close()
 			content, _ := ioutil.ReadAll(rsp.Body)
 			if rsp.StatusCode/100 == 2 {
 				f.Info("data transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
 			} else {
 				f.Error("data not transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
+				m.returnedError <- err
+				return
 			}
-			rsp.Body.Close()
 		}
 	}
 	m.returnedError <- nil
