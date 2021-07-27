@@ -64,7 +64,7 @@ func NewService(log log15.Logger, address string, h Handler, proxyprotocol bool)
 		return fmt.Errorf("cannot open listening address %q: %v", address, err)
 	}
 	if proxyprotocol {
-		l = &proxyproto.Listener{Listener: l, ProxyHeaderTimeout: 10 * time.Second}
+		l = &proxyproto.Listener{Listener: l, ReadHeaderTimeout: 10 * time.Second}
 	}
 	defer l.Close()
 	for {
