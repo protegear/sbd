@@ -43,7 +43,7 @@ type mtPriority struct {
 
 // A Confirmation is returned when a directip call is invoked.
 type Confirmation struct {
-	UniqueClientMsgID [4]byte  `json:"uniqueclientmsgid`
+	UniqueClientMsgID [4]byte  `json:"uniqueclientmsgid"`
 	IMEI              [15]byte `json:"imei"`
 	AutoIDReference   uint32   `json:"autoidreference"`
 	MessageStatus     int16    `json:"messagestatus"`
