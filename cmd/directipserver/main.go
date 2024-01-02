@@ -4,10 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
-	"github.com/inconshreveable/log15"
+	"github.com/lmittmann/tint"
 	"github.com/protegear/sbd"
 	"github.com/protegear/sbd/mux"
 	yaml "gopkg.in/yaml.v2"
@@ -29,7 +32,7 @@ var (
 	revision     string
 	builddate    string
 	distribution mux.Distributer
-	log          log15.Logger
+	log          *slog.Logger
 )
 
 func main() {
@@ -45,7 +48,7 @@ func main() {
 
 	setLogOutput(*logformat, *loglevel)
 
-	log = log15.New("stage", *stage)
+	log = slog.With("stage", *stage)
 
 	listen := defaultListen
 	if len(flag.Args()) > 0 {
@@ -57,19 +60,19 @@ func main() {
 	if *config != "" {
 		cfg, err := os.Open(*config)
 		if err != nil {
-			log.Crit("cannot open config file", "config", *config, "error", err)
+			log.Error("cannot open config file", "config", *config, "error", err)
 			os.Exit(1)
 		}
 
 		var targets mux.Targets
 		err = yaml.NewDecoder(cfg).Decode(&targets)
 		if err != nil {
-			log.Crit("cannot unmarshal data", "error", err)
+			log.Error("cannot unmarshal data", "error", err)
 			os.Exit(1)
 		}
 		err = distribution.WithTargets(targets)
 		if err != nil {
-			log.Crit("cannot use config", "error", err)
+			log.Error("cannot use config", "error", err)
 			os.Exit(1)
 		}
 		log.Info("change configuration", "targets", targets)
@@ -94,7 +97,7 @@ func runHealth(health string) {
 	}))
 }
 
-func watchServices(ctx context.Context, log log15.Logger, client *rest.Config, s mux.Distributer) {
+func watchServices(ctx context.Context, log *slog.Logger, client *rest.Config, s mux.Distributer) {
 	clientset, err := kubernetes.NewForConfig(client)
 	if err != nil {
 		log.Error("cannot create clientset for services", "error", err)
@@ -176,7 +179,7 @@ func targetFromService(s *v1.Service) *mux.Target {
 		}
 		ip := s.Spec.ClusterIP
 		if ip != "" {
-			log15.Info("found target", "imei", t, "path", path, "port", port, "ip", ip)
+			slog.Info("found target", "imei", t, "path", path, "port", port, "ip", ip)
 			bk := mux.Target{
 				ID:          string(s.ObjectMeta.UID),
 				Backend:     fmt.Sprintf("http://%s:%s%s", ip, port, path),
@@ -189,18 +192,34 @@ func targetFromService(s *v1.Service) *mux.Target {
 }
 
 func setLogOutput(format, loglevel string) {
-	h := log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.JsonFormat()))
-	switch format {
-	case logFMT:
-		h = log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.LogfmtFormat()))
-	case logTERM:
-		h = log15.CallerFileHandler(log15.StreamHandler(os.Stdout, log15.TerminalFormat()))
+	lvl := slog.LevelDebug
+	switch strings.ToLower(loglevel) {
+	case "debug":
+		lvl = slog.LevelDebug
+	case "info":
+		lvl = slog.LevelInfo
+	case "warn":
+		lvl = slog.LevelWarn
+	case "error", "crit":
+		lvl = slog.LevelError
 	}
-	lvl, e := log15.LvlFromString(loglevel)
-	if e != nil {
-		lvl = log15.LvlInfo
-		log15.Error("cannot parse level from parameter", "level", loglevel, "error", e)
+
+	if format == "logfmt" || format == "term" {
+		w := os.Stdout
+		slog.SetDefault(slog.New(
+			tint.NewHandler(w, &tint.Options{
+				AddSource:  true,
+				Level:      lvl,
+				TimeFormat: time.DateTime,
+			}),
+		))
+	} else {
+		w := os.Stdout
+		slog.SetDefault(slog.New(
+			slog.NewJSONHandler(w, &slog.HandlerOptions{
+				AddSource: true,
+				Level:     lvl,
+			}),
+		))
 	}
-	target := log15.LvlFilterHandler(lvl, h)
-	log15.Root().SetHandler(target)
 }

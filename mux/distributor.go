@@ -14,11 +14,11 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 
-	"github.com/inconshreveable/log15"
 	"github.com/protegear/sbd"
 )
 
@@ -46,7 +46,7 @@ type Distributer interface {
 }
 
 type distributer struct {
-	log15.Logger
+	*slog.Logger
 	targets       []Target
 	sbdChannel    chan *sbdMessage
 	configChannel chan Targets
@@ -58,7 +58,7 @@ type sbdMessage struct {
 }
 
 // New creates a new Distributor with the given number of workers
-func New(numworkers int, log log15.Logger) Distributer {
+func New(numworkers int, log *slog.Logger) Distributer {
 	sc := make(chan *sbdMessage)
 	cc := make(chan Targets)
 	s := &distributer{
@@ -157,7 +157,7 @@ func (f *distributer) handle(m *sbdMessage) {
 				return
 			}
 			defer rsp.Body.Close()
-			content, _ := ioutil.ReadAll(rsp.Body)
+			content, _ := io.ReadAll(rsp.Body)
 			if rsp.StatusCode/100 == 2 {
 				f.Info("data transmitted", "target", t.Backend, "status", rsp.Status, "content", string(content))
 			} else {

@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
 	"time"
 
-	"github.com/inconshreveable/log15"
 	proxyproto "github.com/pires/go-proxyproto"
 )
 
@@ -33,7 +33,7 @@ func (f HandlerFunc) Handle(data *InformationBucket) error {
 
 // Logger is a middleware function which wraps a handler with logging
 // capabilities.
-func Logger(log log15.Logger, next Handler) Handler {
+func Logger(log *slog.Logger, next Handler) Handler {
 	return HandlerFunc(func(data *InformationBucket) error {
 		js, err := json.Marshal(data)
 		if err != nil {
@@ -58,7 +58,7 @@ func createResult(status byte) *result {
 // short burst data packet to the given handler. If the handler returns a
 // non-nil error, the service will send a negative response, otherwise the
 // responsestatus will be ok.
-func NewService(log log15.Logger, address string, h Handler, proxyprotocol bool) error {
+func NewService(log *slog.Logger, address string, h Handler, proxyprotocol bool) error {
 	l, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("cannot open listening address %q: %v", address, err)
@@ -71,7 +71,7 @@ func NewService(log log15.Logger, address string, h Handler, proxyprotocol bool)
 		// Wait for a connection.
 		conn, err := l.Accept()
 		if err != nil {
-			log.Crit("cannot accept", "error", err)
+			log.Error("cannot accept", "error", err)
 			// let it crash! it's up to the caller of the prog to restart it
 			panic(err)
 		}
