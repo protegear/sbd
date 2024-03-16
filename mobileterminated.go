@@ -86,9 +86,10 @@ func (rq *DirectIPRequest) Do(serverAddress string) (*Confirmation, error) {
 		},
 	}
 	var buf bytes.Buffer
-	cmid := rq.clientmsgid + "0000"
+	cmid := rq.clientmsgid + "\x00\x00\x00\x00"
+	imei := rq.imei + "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 	copy(mth.UniqueClientMsgID[:], []byte(cmid)[0:4])
-	copy(mth.IMEI[:], []byte(rq.imei)[0:15])
+	copy(mth.IMEI[:], []byte(imei)[0:15])
 	if err := binary.Write(&buf, binary.BigEndian, &mth); err != nil {
 		return nil, fmt.Errorf("cannot write MT Header: %w", err)
 	}
