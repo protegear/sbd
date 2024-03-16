@@ -86,10 +86,11 @@ func (rq *DirectIPRequest) Do(serverAddress string) (*Confirmation, error) {
 		},
 	}
 	var buf bytes.Buffer
-	copy(mth.UniqueClientMsgID[:], []byte(rq.clientmsgid)[0:4])
+	cmid := rq.clientmsgid + "0000"
+	copy(mth.UniqueClientMsgID[:], []byte(cmid)[0:4])
 	copy(mth.IMEI[:], []byte(rq.imei)[0:15])
 	if err := binary.Write(&buf, binary.BigEndian, &mth); err != nil {
-		return nil, fmt.Errorf("cannot write MT Header: %v", err)
+		return nil, fmt.Errorf("cannot write MT Header: %w", err)
 	}
 	if rq.priorityLevel != nil {
 		pr := mtPriority{
@@ -100,7 +101,7 @@ func (rq *DirectIPRequest) Do(serverAddress string) (*Confirmation, error) {
 			Level: uint16(*rq.priorityLevel),
 		}
 		if err := binary.Write(&buf, binary.BigEndian, &pr); err != nil {
-			return nil, fmt.Errorf("cannot write MT Priority IE: %v", err)
+			return nil, fmt.Errorf("cannot write MT Priority IE: %w", err)
 		}
 
 	}
@@ -113,10 +114,10 @@ func (rq *DirectIPRequest) Do(serverAddress string) (*Confirmation, error) {
 			ElementLength: uint16(len(rq.payload)),
 		}
 		if err := binary.Write(&buf, binary.BigEndian, &h); err != nil {
-			return nil, fmt.Errorf("cannot write MT Payload IE: %v", err)
+			return nil, fmt.Errorf("cannot write MT Payload IE: %w", err)
 		}
 		if _, err := buf.Write(rq.payload); err != nil {
-			return nil, fmt.Errorf("cannot write payload to buffer: %v", err)
+			return nil, fmt.Errorf("cannot write payload to buffer: %w", err)
 		}
 	}
 	data := buf.Bytes()
